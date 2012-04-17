@@ -15,13 +15,20 @@ import android.util.Log;
 
 public class WWUpdate extends IntentService implements Runnable {
 
-
+    //Intent that is send for update
 	public static final String UPDATE = "WWupdate.UPDATE";
+	//save Application context
 	private Context context=null;
+	//debug
 	public static final boolean DEBUG = WW.DEBUG;
+	//Tag for log output
 	public static final String TAG = "WWupdate";
+	//Classname of the caller
 	private String caller;
+	//current Location
 	private Location lo;
+	
+	
 	public WWUpdate(Context context) {
 		super("WWupdate");
 		this.context=context;
@@ -50,6 +57,10 @@ public class WWUpdate extends IntentService implements Runnable {
 			Log.d(TAG, msg);
 		}
 	}
+	
+
+	
+	//getWoeID by Location from yahoos
 	public long getWoeID(Location location) throws Exception {
 		debug(context.toString());
 		DataInputStream theHTML;
@@ -73,6 +84,8 @@ public class WWUpdate extends IntentService implements Runnable {
 		thisLine = thisLine.replaceAll(pat, "$2");
 		return Long.parseLong(thisLine);
 	}
+	
+	//fetch weather by woeid from yahoos weather api
 	@Override
 	public void run() {
 		URL u;
@@ -83,8 +96,11 @@ public class WWUpdate extends IntentService implements Runnable {
 			if(this.lo==null) {
 				return;
 			}
+			//getWoeID from yahoos geocoding api
 			woeid = getWoeID(this.lo);
 			
+			
+			//get weather xml for current location
 			u = new URL("http://weather.yahooapis.com/forecastrss?w="
 					+ String.valueOf(woeid) + "&u=c");
 			SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -92,6 +108,7 @@ public class WWUpdate extends IntentService implements Runnable {
 			sp = spf.newSAXParser();
 			sp.parse(u.openStream(), h);
 			debug(caller);
+			//send intent with weather data to widget
 			Intent mintent = new Intent(context, Class.forName(caller));
 			mintent.setAction(WW.ACTION_WIDGET_SWITCH);
 			mintent.putExtra("h", h);
@@ -101,11 +118,14 @@ public class WWUpdate extends IntentService implements Runnable {
 		}
 		
 	}
+	
 
+	//handle intents
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		Location l;
 		if (intent.getAction().equals(WWUpdate.UPDATE) && intent.hasExtra("className")) {
+			//if the intent sends locations data and we have the class name of the caller widget we start the update
 			if(intent.hasExtra("location")) {
 				l=(Location) intent.getParcelableExtra("location");
 				new Thread(new WWUpdate(getApplicationContext(),intent.getStringExtra("className"),l)).start();

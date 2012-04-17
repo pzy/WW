@@ -3,8 +3,6 @@ package org.d1sturbed.ww;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 
 import android.app.PendingIntent;
@@ -23,16 +21,26 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 public abstract class WWBaseWidget extends AppWidgetProvider implements LocationListener,Runnable {
+	
+	//debugging
 	public static final boolean DEBUG = true;
 	public static final String TAG = "WW";
+	//intent actions
 	public static final String ACTION_WIDGET_SWITCH = "WW.ACTION_WIDGET_SWITCH";
 	public static String ACTION_START_ACTIVITY = "WW.ACTION_START_ACTIVITY";
+	
+	public static String PATH = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
+	//application context
 	protected Context context;
+	//weather handler data
 	protected WWHandler h;
+	//layout of the widget
 	protected int l;
+	//location
 	protected Location lo;
 
 
+	
 	@Override
 	public void onEnabled(Context context) {
 		debug("onEnabled: " + context.getPackageName());
@@ -45,6 +53,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		}
 	}
 
+	//update the widget data
 	protected void setWidget(WWHandler ha, Bitmap b) {
 		RemoteViews updateViews;
 		AppWidgetManager manager;
@@ -55,7 +64,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		manager = AppWidgetManager.getInstance(context);
 		widget = new ComponentName(context, getClass());
 		
-		//startWWActivity onclick
+		//start WWActivity onclick
 		PendingIntent pendingShowActivityIntent;
 		Intent intent = new Intent(context, getClass());
 		intent.setAction(WWBaseWidget.ACTION_START_ACTIVITY);
@@ -105,32 +114,18 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		
 	}
 
-	public long time2minutes(String time)
-	{
-	    long minuts = 0;
-	    debug(time);
-	    String[] atime = time.split(" ");
-	    if (atime[1].toLowerCase().equals("pm")) {
-	    	debug("pm");
-	        minuts = 12 * 60;
-	    }
-	    String[] ttime = atime[0].split(":");
-	    minuts = minuts + Long.parseLong(ttime[0]) * 60 + Long.parseLong(ttime[1]);
-	    debug(""+minuts);
-	    return minuts;
-	}
+
 
 	@Override
 	//get Weather icon and update Widget
 	public void run() {
 		try {
 			if(h!=null) {
-				long acttime=2*60+time2minutes(new SimpleDateFormat("K:m a").format(new Date()).replaceAll("vorm.", "am").replaceAll("nachm.", "pm"));
 				URL u;
-				if(time2minutes(h.getSunrise())<acttime  && time2minutes(h.getSunset())>acttime) {
-					u=new URL("http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+h.getIconid()+"d.png");					
+				if(h.isDay()) {
+					u=new URL(PATH+h.getIconid()+"d.png");					
 				} else {
-					u=new URL("http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+h.getIconid()+"n.png");
+					u=new URL(PATH+h.getIconid()+"n.png");
 				}
 				HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 				connection.setDoInput(true);
@@ -149,6 +144,8 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		}
 	}
 	
+	
+	//send update intent to update service
 	private void updateWeather(Location myl) {
 		Intent mintent = new Intent(this.context, WWUpdate.class);
 		mintent.setAction(WWUpdate.UPDATE);
@@ -158,13 +155,17 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	}
 	
 
+	//receive incoming intents
 	public void onReceive(Context context, Intent intent) {
 		debug(getClass().getName()+":"+intent.getAction());
 		WWBaseWidget w=null;
 		WWHandler h=null;
+		//get Handler Extra, contains weather data
 		if(intent.hasExtra("h")) {
 			h=(WWHandler)intent.getExtras().getSerializable("h");
 		}
+		
+		//which widget are we? (ugly)
 		switch(l) {
 			case R.layout.widget:
 				w=new WW(context,h);
@@ -176,6 +177,8 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				w=null;
 				break;						
 		}
+		
+		//weather data update 
 		if(intent.getAction().equals("android.appwidget.action.APPWIDGET_UPDATE")) {
 			LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 			Location myl=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -183,10 +186,13 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 			if(myl!=null) {
 				w.updateWeather(myl);
 			}
+			
+		//widget view update
 		} else if (intent.getAction().equals(WW.ACTION_WIDGET_SWITCH)) {
 			if(w!=null) {
 				new Thread(w).start();
 			}
+		//start application with containing contents
 		} else if (intent.getAction().equals(WW.ACTION_START_ACTIVITY)) {
 			Intent mintent = new Intent(context, WWActivity.class);
 			mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

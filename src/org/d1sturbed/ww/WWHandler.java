@@ -1,6 +1,9 @@
 package org.d1sturbed.ww;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -8,7 +11,7 @@ import android.util.Log;
 
 public class WWHandler extends DefaultHandler implements Serializable {
 	/**
-	 * 
+	 * handler for parsing xml
 	 */
 	private static final long serialVersionUID = 4793473735545011541L;
 	private final String TEMPTAG = "condition";
@@ -37,7 +40,6 @@ public class WWHandler extends DefaultHandler implements Serializable {
 	private String iconid;
 	private String sunrise;
 	private String sunset;
-	private boolean isDay;
 	private String location;
 	
 	private int low_temp=0;
@@ -63,7 +65,21 @@ public class WWHandler extends DefaultHandler implements Serializable {
 	public void endDocument() throws SAXException {
 
 	}
- 
+	//make times comparable
+	public long time2minutes(String time)
+	{
+	    long minuts = 0;
+	    debug(time);
+	    String[] atime = time.split(" ");
+	    if (atime[1].toLowerCase().equals("pm")) {
+	    	debug("pm");
+	        minuts = 12 * 60;
+	    }
+	    String[] ttime = atime[0].split(":");
+	    minuts = minuts + Long.parseLong(ttime[0]) * 60 + Long.parseLong(ttime[1]);
+	    debug(""+minuts);
+	    return minuts;
+	}
 	@Override
 	public void startElement(String namespaceURI, String localName,String qName, Attributes atts) throws SAXException {
 		data=null;
@@ -112,6 +128,14 @@ public class WWHandler extends DefaultHandler implements Serializable {
 		return this.desc;
 	}
 
+	public boolean isDay() {
+		long acttime=2*60+time2minutes(new SimpleDateFormat("K:m a").format(new Date()).replaceAll("vorm.", "am").replaceAll("nachm.", "pm"));
+		if(time2minutes(getSunrise())<acttime  && time2minutes(getSunset())>acttime) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	@Override
     public void characters(char ch[], int start, int length)throws SAXException {
@@ -194,16 +218,6 @@ public class WWHandler extends DefaultHandler implements Serializable {
 
 	public void setIconid(String iconid) {
 		this.iconid = iconid;
-	}
-
-
-	public boolean isDay() {
-		return isDay;
-	}
-
-
-	public void setDay(boolean isDay) {
-		this.isDay = isDay;
 	}
 
 

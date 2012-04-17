@@ -17,6 +17,8 @@ public class WWActivity extends Activity {
 	public WWActivity() {
 	}
 	
+	
+	//show Activity with given data
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		setTitle(getPackageName());
