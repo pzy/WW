@@ -2,7 +2,6 @@ package org.d1sturbed.ww;
 
 import java.io.DataInputStream;
 import java.net.URL;
-import java.security.KeyStore.LoadStoreParameter;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -42,7 +41,8 @@ public class WWUpdate extends IntentService implements Runnable {
 			Log.d(TAG, msg);
 		}
 	}
-	public long getWoeID(Context context) throws Exception {
+	public long getWoeID() throws Exception {
+		debug(context.toString());
 		LocationManager locationManager = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 		Location lastKnownLocation = locationManager
@@ -50,11 +50,11 @@ public class WWUpdate extends IntentService implements Runnable {
 		DataInputStream theHTML;
 		String thisLine = "";
 		StringBuffer sb = new StringBuffer();
-		URL u = new URL("http://where.yahooapis.com/geocode?location="
+		debug("http://where.yahooapis.com/geocode?location="
 				+ String.valueOf(lastKnownLocation.getLatitude()) + "+"
 				+ String.valueOf(lastKnownLocation.getLongitude())
 				+ "&locale=de_DE&gflags=R&flags=J");
-		debug("http://where.yahooapis.com/geocode?location="
+		URL u = new URL("http://where.yahooapis.com/geocode?location="
 				+ String.valueOf(lastKnownLocation.getLatitude()) + "+"
 				+ String.valueOf(lastKnownLocation.getLongitude())
 				+ "&locale=de_DE&gflags=R&flags=J");
@@ -74,7 +74,7 @@ public class WWUpdate extends IntentService implements Runnable {
 		long woeid = 0;
 		WWHandler h = new WWHandler();
 		try {
-			woeid = getWoeID(context);
+			woeid = getWoeID();
 			
 			u = new URL("http://weather.yahooapis.com/forecastrss?w="
 					+ String.valueOf(woeid) + "&u=c");

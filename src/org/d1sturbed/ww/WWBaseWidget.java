@@ -5,8 +5,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
+
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,6 +20,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 public abstract class WWBaseWidget extends AppWidgetProvider implements LocationListener,Runnable {
 	public static final boolean DEBUG = true;
@@ -24,6 +29,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	public static String ACTION_START_ACTIVITY = "WW.ACTION_START_ACTIVITY";
 	protected Context context;
 	protected WWHandler h;
+	protected int l;
 
 
 	@Override
@@ -38,7 +44,35 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		}
 	}
 
-
+	protected void setWidget(WWHandler ha, Bitmap b) {
+		RemoteViews updateViews;
+		AppWidgetManager manager;
+		ComponentName widget;
+		
+		updateViews = new RemoteViews(context.getPackageName(), l);
+		debug("Base" + getClass().getName());
+		manager = AppWidgetManager.getInstance(context);
+		widget = new ComponentName(context, getClass());
+		PendingIntent pendingShowActivityIntent;
+		Intent intent = new Intent(context, getClass());
+		intent.setAction(WWBaseWidget.ACTION_START_ACTIVITY);
+		intent.putExtra("h", ha);
+		intent.putExtra("b", b);
+		pendingShowActivityIntent = PendingIntent.getBroadcast(context, new Random().nextInt(),
+				intent, 0);
+		updateViews.setOnClickPendingIntent(R.id.widget_textview,
+				pendingShowActivityIntent);
+		try {
+			if(b!=null) {
+				updateViews.setImageViewBitmap(R.id.widget_imageview, b);
+			}
+			updateViews.setTextViewText(R.id.widget_textview, "Act:" + ha.getTemperature() + " °"+h.getTempUnit()+"\nN: "+ ha.getLow_temp()+" °"+h.getTempUnit()+"\nH: "+ha.getHigh_temp()+" °"+h.getTempUnit());
+		} catch (Exception e) {
+			debug("Fehler: " + e.toString());
+			updateViews.setTextViewText(R.id.widget_textview, "Fehler:" + e.toString());
+		}
+		manager.updateAppWidget(widget, updateViews);
+	}
 
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
@@ -76,7 +110,6 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		
 	}
 
-	protected abstract void setWidget(WWHandler ha, Bitmap b);
 	
 	public long time2minuts(String time)
 	{
@@ -107,11 +140,47 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				connection.setDoInput(true);
 				connection.connect();
 				InputStream input = connection.getInputStream();
-				setWidget(this.h, BitmapFactory.decodeStream(input));
+				Bitmap b=BitmapFactory.decodeStream(input);
+				if(b!=null) {
+					setWidget(this.h, b);
+				} else {
+					setWidget(this.h, null);					
+				}
 			}
 		} catch(Exception e) {
 			setWidget(h, null);
 			debug("Could not get weather icon" + e.toString());
+		}
+	}
+	
+
+	public void onReceive(Context context, Intent intent) {
+		debug(getClass().getName()+":"+intent.getAction());
+		if(intent.getAction().equals("android.appwidget.action.APPWIDGET_UPDATE")) {
+			Intent mintent = new Intent(context, WWUpdate.class);
+			mintent.setAction(WWUpdate.UPDATE);
+			mintent.putExtra("className", this.getClass().getName());
+			context.startService(mintent);
+		} else if (intent.getAction().equals(WW.ACTION_WIDGET_SWITCH)) {
+			if(intent.hasExtra("h")) {
+				WWHandler h= (WWHandler)intent.getExtras().getSerializable("h");
+				if(l==R.layout.widget) {
+					new Thread(new WW(context,h)).start();
+				} else {
+					new Thread(new WW2x1(context,h)).start();					
+				}
+			}
+		} else if (intent.getAction().equals(WW.ACTION_START_ACTIVITY)) {
+			Intent mintent = new Intent(context, WWActivity.class);
+			mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+			if(intent.hasExtra("h")) {
+				WWHandler h=(WWHandler) intent.getSerializableExtra("h");
+				mintent.putExtra("h", h);
+			}
+			if(intent.hasExtra("b")) {
+				mintent.putExtra("b", (Bitmap) intent.getParcelableExtra("b"));
+			}
+			context.startActivity(mintent);
 		}
 	}
 
