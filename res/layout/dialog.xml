@@ -15,6 +15,7 @@
            android:layout_height="76dip"
            android:layout_width="76dip"
            android:padding="0dip"
+           android:contentDescription="@string/image"
            android:layout_margin="6dip" />
        <TextView
            android:id="@+id/widget_textview"

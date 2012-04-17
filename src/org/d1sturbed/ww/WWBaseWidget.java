@@ -30,6 +30,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	protected Context context;
 	protected WWHandler h;
 	protected int l;
+	protected Location lo;
 
 
 	@Override
@@ -53,15 +54,17 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		debug("Base" + getClass().getName());
 		manager = AppWidgetManager.getInstance(context);
 		widget = new ComponentName(context, getClass());
+		
+		//startWWActivity onclick
 		PendingIntent pendingShowActivityIntent;
 		Intent intent = new Intent(context, getClass());
 		intent.setAction(WWBaseWidget.ACTION_START_ACTIVITY);
 		intent.putExtra("h", ha);
 		intent.putExtra("b", b);
-		pendingShowActivityIntent = PendingIntent.getBroadcast(context, new Random().nextInt(),
-				intent, 0);
-		updateViews.setOnClickPendingIntent(R.id.widget_textview,
-				pendingShowActivityIntent);
+		pendingShowActivityIntent = PendingIntent.getBroadcast(context, new Random().nextInt(),	intent, 0);
+		updateViews.setOnClickPendingIntent(R.id.widget_textview, pendingShowActivityIntent);
+		
+		//set Widget
 		try {
 			if(b!=null) {
 				updateViews.setImageViewBitmap(R.id.widget_imageview, b);
@@ -71,37 +74,29 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 			debug("Fehler: " + e.toString());
 			updateViews.setTextViewText(R.id.widget_textview, "Fehler:" + e.toString());
 		}
+		
+		//update View
 		manager.updateAppWidget(widget, updateViews);
 	}
 
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
-
-		debug("test");
-		LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-		Intent intent = new Intent(context, WWUpdate.class);
-		intent.setAction(WWUpdate.UPDATE);
-		context.startService(intent);
+		super.onUpdate(context, appWidgetManager, appWidgetIds);
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
-		Intent mintent = new Intent(context, WWUpdate.class);
-		mintent.setAction(WWUpdate.UPDATE);
-		context.startService(mintent);
+		updateWeather(location);
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		// TODO Auto-generated method stub
-		
+		debug(provider);
 	}
 
 	@Override
@@ -110,13 +105,13 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		
 	}
 
-	
-	public long time2minuts(String time)
+	public long time2minutes(String time)
 	{
 	    long minuts = 0;
 	    debug(time);
 	    String[] atime = time.split(" ");
 	    if (atime[1].toLowerCase().equals("pm")) {
+	    	debug("pm");
 	        minuts = 12 * 60;
 	    }
 	    String[] ttime = atime[0].split(":");
@@ -126,12 +121,13 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	}
 
 	@Override
+	//get Weather icon and update Widget
 	public void run() {
 		try {
 			if(h!=null) {
-				long acttime=time2minuts(new SimpleDateFormat("k:m a").format(new Date()).replaceAll("vorm.", "am").replaceAll("nachm.", "pm"));
+				long acttime=2*60+time2minutes(new SimpleDateFormat("K:m a").format(new Date()).replaceAll("vorm.", "am").replaceAll("nachm.", "pm"));
 				URL u;
-				if(time2minuts(h.getSunrise())<acttime  && time2minuts(h.getSunset())>acttime) {
+				if(time2minutes(h.getSunrise())<acttime  && time2minutes(h.getSunset())>acttime) {
 					u=new URL("http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+h.getIconid()+"d.png");					
 				} else {
 					u=new URL("http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+h.getIconid()+"n.png");
@@ -153,28 +149,48 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		}
 	}
 	
+	private void updateWeather(Location myl) {
+		Intent mintent = new Intent(this.context, WWUpdate.class);
+		mintent.setAction(WWUpdate.UPDATE);
+		mintent.putExtra("location", myl);
+		mintent.putExtra("className", this.getClass().getName());
+		context.startService(mintent);		
+	}
+	
 
 	public void onReceive(Context context, Intent intent) {
 		debug(getClass().getName()+":"+intent.getAction());
+		WWBaseWidget w=null;
+		WWHandler h=null;
+		if(intent.hasExtra("h")) {
+			h=(WWHandler)intent.getExtras().getSerializable("h");
+		}
+		switch(l) {
+			case R.layout.widget:
+				w=new WW(context,h);
+				break;
+			case R.layout.widget2x1:
+				w=new WW2x1(context,h);
+				break;
+			default:
+				w=null;
+				break;						
+		}
 		if(intent.getAction().equals("android.appwidget.action.APPWIDGET_UPDATE")) {
-			Intent mintent = new Intent(context, WWUpdate.class);
-			mintent.setAction(WWUpdate.UPDATE);
-			mintent.putExtra("className", this.getClass().getName());
-			context.startService(mintent);
+			LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+			Location myl=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000000, 1000, w);
+			if(myl!=null) {
+				w.updateWeather(myl);
+			}
 		} else if (intent.getAction().equals(WW.ACTION_WIDGET_SWITCH)) {
-			if(intent.hasExtra("h")) {
-				WWHandler h= (WWHandler)intent.getExtras().getSerializable("h");
-				if(l==R.layout.widget) {
-					new Thread(new WW(context,h)).start();
-				} else {
-					new Thread(new WW2x1(context,h)).start();					
-				}
+			if(w!=null) {
+				new Thread(w).start();
 			}
 		} else if (intent.getAction().equals(WW.ACTION_START_ACTIVITY)) {
 			Intent mintent = new Intent(context, WWActivity.class);
-			mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
-			if(intent.hasExtra("h")) {
-				WWHandler h=(WWHandler) intent.getSerializableExtra("h");
+			mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			if(h!=null) {
 				mintent.putExtra("h", h);
 			}
 			if(intent.hasExtra("b")) {

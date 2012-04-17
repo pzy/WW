@@ -1,6 +1,7 @@
 package org.d1sturbed.ww;
 
 import android.content.Context;
+import android.location.Location;
 
 
 public class WW2x1 extends WWBaseWidget {
@@ -14,6 +15,13 @@ public class WW2x1 extends WWBaseWidget {
 		this.context=context;
 		this.h=h;
 		this.l=R.layout.widget2x1;
+	}
+	
+	public WW2x1(Context context, WWHandler h, Location lo) {
+		this.context=context;
+		this.h=h;
+		this.l=R.layout.widget;
+		this.lo=lo;
 	}
 	
 	public WW2x1() {

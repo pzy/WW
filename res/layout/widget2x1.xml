@@ -17,6 +17,7 @@
            android:background="#11999999"
            android:layout_height="fill_parent"
            android:layout_gravity="right|center_vertical"
+           android:contentDescription="@string/image"
            android:padding="6dp"
            android:layout_margin="6dp" />
 <TextView
@@ -31,7 +32,7 @@
            android:shadowRadius="1"
            android:shadowDy="1"
            android:shadowDx="1"
-           android:text="Lade"
+           android:text="@string/load"
            android:padding="6dp"
            android:layout_margin="6dp" />
 </LinearLayout>

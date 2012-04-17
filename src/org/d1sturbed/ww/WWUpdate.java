@@ -11,7 +11,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.util.Log;
 
 public class WWUpdate extends IntentService implements Runnable {
@@ -22,6 +21,7 @@ public class WWUpdate extends IntentService implements Runnable {
 	public static final boolean DEBUG = WW.DEBUG;
 	public static final String TAG = "WWupdate";
 	private String caller;
+	private Location lo;
 	public WWUpdate(Context context) {
 		super("WWupdate");
 		this.context=context;
@@ -32,6 +32,15 @@ public class WWUpdate extends IntentService implements Runnable {
 		this.context=context;
 		this.caller=c;
 	}
+	
+	
+	public WWUpdate(Context context, String c, Location lo) {
+		super("WWupdate");
+		this.context=context;
+		this.caller=c;
+		this.lo=lo;
+	}
+	
 	public WWUpdate() {
 		super("WWupdate");
 	}
@@ -41,22 +50,19 @@ public class WWUpdate extends IntentService implements Runnable {
 			Log.d(TAG, msg);
 		}
 	}
-	public long getWoeID() throws Exception {
+	public long getWoeID(Location location) throws Exception {
 		debug(context.toString());
-		LocationManager locationManager = (LocationManager) context
-				.getSystemService(Context.LOCATION_SERVICE);
-		Location lastKnownLocation = locationManager
-				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		DataInputStream theHTML;
 		String thisLine = "";
 		StringBuffer sb = new StringBuffer();
+
 		debug("http://where.yahooapis.com/geocode?location="
-				+ String.valueOf(lastKnownLocation.getLatitude()) + "+"
-				+ String.valueOf(lastKnownLocation.getLongitude())
+				+ String.valueOf(location.getLatitude()) + "+"
+				+ String.valueOf(location.getLongitude())
 				+ "&locale=de_DE&gflags=R&flags=J");
 		URL u = new URL("http://where.yahooapis.com/geocode?location="
-				+ String.valueOf(lastKnownLocation.getLatitude()) + "+"
-				+ String.valueOf(lastKnownLocation.getLongitude())
+				+ String.valueOf(location.getLatitude()) + "+"
+				+ String.valueOf(location.getLongitude())
 				+ "&locale=de_DE&gflags=R&flags=J");
 		theHTML = new DataInputStream(u.openStream());
 		while ((thisLine = theHTML.readLine()) != null) {
@@ -74,7 +80,10 @@ public class WWUpdate extends IntentService implements Runnable {
 		long woeid = 0;
 		WWHandler h = new WWHandler();
 		try {
-			woeid = getWoeID();
+			if(this.lo==null) {
+				return;
+			}
+			woeid = getWoeID(this.lo);
 			
 			u = new URL("http://weather.yahooapis.com/forecastrss?w="
 					+ String.valueOf(woeid) + "&u=c");
@@ -86,18 +95,21 @@ public class WWUpdate extends IntentService implements Runnable {
 			Intent mintent = new Intent(context, Class.forName(caller));
 			mintent.setAction(WW.ACTION_WIDGET_SWITCH);
 			mintent.putExtra("h", h);
-			debug("test");
 			context.sendBroadcast(mintent);
 		} catch (Exception e) {
-			e.printStackTrace();
+			debug(e.toString());
 		}
 		
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
+		Location l;
 		if (intent.getAction().equals(WWUpdate.UPDATE) && intent.hasExtra("className")) {
-			new Thread(new WWUpdate(getApplicationContext(),intent.getStringExtra("className"))).start();
+			if(intent.hasExtra("location")) {
+				l=(Location) intent.getParcelableExtra("location");
+				new Thread(new WWUpdate(getApplicationContext(),intent.getStringExtra("className"),l)).start();
+			} 
 		}
 	}
 

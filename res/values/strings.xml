@@ -4,5 +4,7 @@
     <string name="hello">Hello World, WWActivity!</string>
     <string name="app_name">WW</string>
     <string name="app_name_2x1">WW (2x1)</string>
+    <string name="image">image</string>
+    <string name="load">loading..</string>
 
 </resources>
