@@ -196,7 +196,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	}
 
 	public String getPic() {
-		return "http://google.com"+pic;
+		return "http://www.google.com"+pic;
 	}
 
 	public void setPic(String pic) {
