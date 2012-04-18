@@ -3,11 +3,9 @@ package org.d1sturbed.ww;
 
 import android.app.Activity;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 public class WWActivity extends Activity {
@@ -34,13 +32,10 @@ public class WWActivity extends Activity {
 			Log.v("WWActivity", e.toString());
 		}
 		Log.v("icky", extras.get("h").toString());
-		WWHandler h=(WWHandler) extras.getSerializable("h");
-		Bitmap b=(Bitmap)extras.getParcelable("b");
+		WWBaseHandler h=(WWBaseHandler) extras.getSerializable("h");
 		TextView tv= (TextView) findViewById(R.id.widget_textview);
-		ImageView iv= (ImageView) findViewById(R.id.widget_imageview);
 		tv.setMovementMethod(LinkMovementMethod.getInstance());
-		tv.setText(h.getLocation()+"\n" + h.getDesc()+"\n"+h.getUrl()+"\nVersion: "+ver+"-"+name);
-		iv.setImageBitmap(b);
+		tv.setText(h.getDesc()+"\n\nVersion: "+ver+"-"+name);
 		super.onCreate(savedInstanceState);
 	}
 

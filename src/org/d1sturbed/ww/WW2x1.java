@@ -11,13 +11,13 @@ public class WW2x1 extends WWBaseWidget {
 		this.l=R.layout.widget2x1;
 	}
 
-	public WW2x1(Context context, WWHandler h) {
+	public WW2x1(Context context, WWBaseHandler h) {
 		this.context=context;
 		this.h=h;
 		this.l=R.layout.widget2x1;
 	}
 	
-	public WW2x1(Context context, WWHandler h, Location lo) {
+	public WW2x1(Context context, WWBaseHandler h, Location lo) {
 		this.context=context;
 		this.h=h;
 		this.l=R.layout.widget;

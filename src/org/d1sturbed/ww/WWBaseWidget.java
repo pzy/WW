@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
+import android.graphics.PorterDuff.Mode;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -12,7 +13,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -29,11 +36,10 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	public static final String ACTION_WIDGET_SWITCH = "WW.ACTION_WIDGET_SWITCH";
 	public static String ACTION_START_ACTIVITY = "WW.ACTION_START_ACTIVITY";
 	
-	public static String PATH = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
 	//application context
 	protected Context context;
 	//weather handler data
-	protected WWHandler h;
+	protected WWBaseHandler h;
 	//layout of the widget
 	protected int l;
 	//location
@@ -52,9 +58,29 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 			Log.d(TAG, msg);
 		}
 	}
+   public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
+                .getHeight(), Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
 
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+        final float roundPx = pixels;
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output;
+    }
 	//update the widget data
-	protected void setWidget(WWHandler ha, Bitmap b) {
+	protected void setWidget(WWBaseHandler ha, Bitmap b) {
 		RemoteViews updateViews;
 		AppWidgetManager manager;
 		ComponentName widget;
@@ -76,9 +102,10 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		//set Widget
 		try {
 			if(b!=null) {
-				updateViews.setImageViewBitmap(R.id.widget_imageview, b);
+				updateViews.setImageViewBitmap(R.id.widget_imageview, getRoundedCornerBitmap(b, 15));
+				updateViews.setInt(R.id.widget_imageview, "setAlpha", 50);
 			}
-			updateViews.setTextViewText(R.id.widget_textview, "Act:" + ha.getTemperature() + " °"+h.getTempUnit()+"\nN: "+ ha.getLow_temp()+" °"+h.getTempUnit()+"\nH: "+ha.getHigh_temp()+" °"+h.getTempUnit());
+			updateViews.setTextViewText(R.id.widget_textview, ha.getShortString());
 		} catch (Exception e) {
 			debug("Fehler: " + e.toString());
 			updateViews.setTextViewText(R.id.widget_textview, "Fehler:" + e.toString());
@@ -121,12 +148,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	public void run() {
 		try {
 			if(h!=null) {
-				URL u;
-				if(h.isDay()) {
-					u=new URL(PATH+h.getIconid()+"d.png");					
-				} else {
-					u=new URL(PATH+h.getIconid()+"n.png");
-				}
+				URL u=new URL(h.getPic());
 				HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 				connection.setDoInput(true);
 				connection.connect();
@@ -159,10 +181,10 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	public void onReceive(Context context, Intent intent) {
 		debug(getClass().getName()+":"+intent.getAction());
 		WWBaseWidget w=null;
-		WWHandler h=null;
+		WWBaseHandler h=null;
 		//get Handler Extra, contains weather data
 		if(intent.hasExtra("h")) {
-			h=(WWHandler)intent.getExtras().getSerializable("h");
+			h=(WWBaseHandler)intent.getExtras().getSerializable("h");
 		}
 		
 		//which widget are we? (ugly)

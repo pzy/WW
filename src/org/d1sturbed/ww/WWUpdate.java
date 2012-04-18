@@ -19,6 +19,7 @@ public class WWUpdate extends IntentService implements Runnable {
 	public static final String UPDATE = "WWupdate.UPDATE";
 	//save Application context
 	private Context context=null;
+	private int PROVIDER=1;
 	//debug
 	public static final boolean DEBUG = WW.DEBUG;
 	//Tag for log output
@@ -90,19 +91,35 @@ public class WWUpdate extends IntentService implements Runnable {
 	public void run() {
 		URL u;
 		debug("run()");
-		long woeid = 0;
-		WWHandler h = new WWHandler();
+		WWBaseHandler h;
 		try {
 			if(this.lo==null) {
 				return;
 			}
-			//getWoeID from yahoos geocoding api
-			woeid = getWoeID(this.lo);
-			
-			
-			//get weather xml for current location
-			u = new URL("http://weather.yahooapis.com/forecastrss?w="
-					+ String.valueOf(woeid) + "&u=c");
+			switch(PROVIDER) {
+				case 0:
+					long woeid = 0;
+					h = new WWYahooHandler();			
+					//getWoeID from yahoos geocoding api
+					woeid = getWoeID(this.lo);
+					//get weather xml for current location
+					u = new URL("http://weather.yahooapis.com/forecastrss?w="
+						+ String.valueOf(woeid) + "&u=c");
+					break;
+				case 1:
+					h = new WWGoogleHandler();	
+					u= new URL("http://www.google.com/ig/api?weather=,,,"+ String.format("%.0f", lo.getLatitude()*1000000) + ","
+					+ String.format("%.0f", lo.getLongitude()*1000000));
+					 break;
+				 default:
+					 h=null;
+					 u=null;
+					 break;
+			}
+			if(u==null || h==null) {
+				return;
+			}
+			debug(u.toString());
 			SAXParserFactory spf = SAXParserFactory.newInstance();
 			SAXParser sp = null;
 			sp = spf.newSAXParser();
@@ -114,7 +131,7 @@ public class WWUpdate extends IntentService implements Runnable {
 			mintent.putExtra("h", h);
 			context.sendBroadcast(mintent);
 		} catch (Exception e) {
-			debug(e.toString());
+			debug(e.toString()+e.getMessage());
 		}
 		
 	}

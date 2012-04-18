@@ -12,14 +12,14 @@ public class WW extends WWBaseWidget {
 		this.l=R.layout.widget;
 	}
 
-	public WW(Context context, WWHandler h) {
+	public WW(Context context, WWBaseHandler h) {
 		this.context=context;
 		this.h=h;
 		this.l=R.layout.widget;
 	}
 	
 
-	public WW(Context context, WWHandler h, Location lo) {
+	public WW(Context context, WWBaseHandler h, Location lo) {
 		this.context=context;
 		this.h=h;
 		this.l=R.layout.widget;

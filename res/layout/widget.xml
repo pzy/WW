@@ -12,10 +12,10 @@
        <ImageView
            android:id="@+id/widget_imageview"
            android:scaleType="centerCrop"
-           android:background="#00000000"
+           android:background="@layout/radius"
            android:layout_width="fill_parent"
            android:layout_height="fill_parent"
-                      android:contentDescription="@string/image"
+            android:contentDescription="@string/image"
            android:padding="0dip"
            android:layout_margin="0dip" />
 <TextView
