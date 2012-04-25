@@ -1,11 +1,16 @@
 package org.d1sturbed.ww;
 
+import java.io.DataInputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
+import android.location.Location;
 import android.util.Log;
 
 public class WWYahooHandler extends WWBaseHandler implements Serializable {
@@ -45,14 +50,36 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	public static final boolean DEBUG = WW.DEBUG;
 	public static final String TAG = "WWHandler";
 
-	
+
 	protected void debug(String msg) {
 		if (DEBUG) {
 			Log.d(TAG, msg);
 		}
 	}
  
- 
+	//getWoeID by Location from yahoos
+	public long getWoeID(Location location) throws Exception {
+		DataInputStream theHTML;
+		String thisLine = "";
+		StringBuffer sb = new StringBuffer();
+
+		debug("http://where.yahooapis.com/geocode?location="
+				+ String.valueOf(location.getLatitude()) + "+"
+				+ String.valueOf(location.getLongitude())
+				+ "&locale=de_DE&gflags=R&flags=J");
+		URL u = new URL("http://where.yahooapis.com/geocode?location="
+				+ String.valueOf(location.getLatitude()) + "+"
+				+ String.valueOf(location.getLongitude())
+				+ "&locale=de_DE&gflags=R&flags=J");
+		theHTML = new DataInputStream(u.openStream());
+		while ((thisLine = theHTML.readLine()) != null) {
+			sb.append(thisLine);
+		}
+		String pat = ".*(,\"woeid\":)(.+?)(,\"woetype).*";
+		thisLine = new String(sb).replaceAll("\\r\\n|\\r|\\n|\\t|\\ ", "");
+		thisLine = thisLine.replaceAll(pat, "$2");
+		return Long.parseLong(thisLine);
+	}
 	@Override
 	public void startDocument() throws SAXException {
 		interested = false;
@@ -186,16 +213,13 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 		}
 	}
 
-	public String getUrl() {
-		return url;
-	}
 
 	public void setUrl(String url) {
 		this.url = url;
 	}
 	
 	public String toString() {
-		return getDesc()+":"+getUrl()+":"+getPic()+"";
+		return getDesc()+":"+getPic()+"";
 		
 	}
 
@@ -255,4 +279,27 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 		// TODO Auto-generated method stub
 		return "Act: "+ getTemperature()+" °"+getTempUnit()+"\nN: "+ getLow_temp()+" °"+getTempUnit()+"\nH: "+getHigh_temp()+" °"+getTempUnit();
 	}
+
+	@Override
+	public URL getUrl(Location lo) {
+		long woeid=0;
+		//getWoeID from yahoos geocoding api
+		try {
+			woeid = getWoeID(lo);
+			return new URL("http://weather.yahooapis.com/forecastrss?w="
+					+ String.valueOf(woeid) + "&u=c");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			return null;
+		}
+		//get weather xml for current location
+	}
+
+	@Override
+	public ArrayList<String> getForcecastPics() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 }

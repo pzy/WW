@@ -1,12 +1,16 @@
 package org.d1sturbed.ww;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
+import android.location.Location;
 import android.util.Log;
 
 public class WWGoogleHandler extends WWBaseHandler implements Serializable {
@@ -41,7 +45,6 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	private boolean current;
 	private int temperature;
 	private String pic;
-	private String url;
 	private String humidity;
 	private String iconid;
 	private String sunrise;
@@ -55,7 +58,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	public static final boolean DEBUG = WW.DEBUG;
 	public static final String TAG = "WWHandler";
 
-	
+
 	protected void debug(String msg) {
 		if (DEBUG) {
 			Log.d(TAG, msg);
@@ -98,18 +101,21 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 			debug("hit");
 		} else if(localName.equals(TEMPTAG) && interested && current) {
 			    temperature=Integer.parseInt(atts.getValue("data"));
-		} else if(localName.equals(PICTAG) && interested) {
+		} else if(localName.equals(PICTAG) && interested && current) {
 				pic=atts.getValue("data");
-		} else if(localName.equals(HUMTAG) && interested) {
+		} else if(localName.equals(HUMTAG) && interested && current) {
 			setHumidity(atts.getValue("data"));
 		} else if(localName.equals(FORETAG)) {
 			interested=true;
+			current=false;
 			f=new WWForecast();
 		} else if(localName.equals(HIGHTAG) && interested && !current) {
+			debug("licky: " + atts.getValue("data"));
 			f.setHigh((Integer.parseInt(atts.getValue("data"))-32)*5/9);
 		} else if(localName.equals(LOWTAG) && interested && !current) {
 			f.setLow((Integer.parseInt(atts.getValue("data"))-32)*5/9);
 		} else if(localName.equals(PICTAG) && interested && !current) {
+			debug("licky: " + atts.getValue("data"));
 			f.setIcon(atts.getValue("data"));
 		} else if(localName.equals(CONDITIONTAG) && interested && !current) {
 			f.setCondition(atts.getValue("data"));
@@ -203,16 +209,8 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 		this.pic = pic;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	
 	public String toString() {
-		return getDesc()+":"+getUrl()+":"+getPic()+"";
+		return getDesc()+":"+getPic()+"";
 		
 	}
 
@@ -274,5 +272,29 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 
 	public void setHumidity(String humidity) {
 		this.humidity = humidity;
+	}
+
+
+	@Override
+	public URL getUrl(Location lo) {
+		try {
+			debug("http://www.google.com/ig/api?weather=,,,"+ String.format("%.0f", lo.getLatitude()*1000000) + ","
+					+ String.format("%.0f", lo.getLongitude()*1000000));
+			return new URL("http://www.google.com/ig/api?weather=,,,"+ String.format("%.0f", lo.getLatitude()*1000000) + ","
+					+ String.format("%.0f", lo.getLongitude()*1000000));
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
+
+
+	@Override
+	public ArrayList<String> getForcecastPics() {
+		ArrayList<String> al=new ArrayList<String>();
+		for(int i=0;i<wwf.size();i++) {
+			debug(wwf.get(i).getIcon());
+			al.add(wwf.get(i).getIcon());
+		}
+		return al;
 	}
 }

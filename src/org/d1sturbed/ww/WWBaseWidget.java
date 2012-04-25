@@ -3,6 +3,7 @@ package org.d1sturbed.ww;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Random;
 import android.graphics.PorterDuff.Mode;
 
@@ -24,6 +25,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -49,7 +51,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	
 	@Override
 	public void onEnabled(Context context) {
-		debug("onEnabled: " + context.getPackageName());
+		debug("onEnabled-: " + context.getPackageName());
 		super.onEnabled(context);
 	}
 
@@ -79,6 +81,8 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 
         return output;
     }
+   
+    
 	//update the widget data
 	protected void setWidget(WWBaseHandler ha, Bitmap b) {
 		RemoteViews updateViews;
@@ -95,7 +99,10 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		Intent intent = new Intent(context, getClass());
 		intent.setAction(WWBaseWidget.ACTION_START_ACTIVITY);
 		intent.putExtra("h", ha);
-		intent.putExtra("b", b);
+		if(b!=null) {
+			intent.putExtra("b", b);	
+		}
+
 		pendingShowActivityIntent = PendingIntent.getBroadcast(context, new Random().nextInt(),	intent, 0);
 		updateViews.setOnClickPendingIntent(R.id.widget_textview, pendingShowActivityIntent);
 		
@@ -152,9 +159,32 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 				connection.setDoInput(true);
 				connection.connect();
+				//connection.setUseCaches(true);
 				InputStream input = connection.getInputStream();
 				Bitmap b=BitmapFactory.decodeStream(input);
-				if(b!=null) {
+				connection.disconnect();
+				input.close();
+				debug(h.getPic());
+				ArrayList<Bitmap> ba=new ArrayList<Bitmap>();
+				ArrayList<String> sa=h.getForcecastPics();
+				debug(sa.size()+"-");
+				for(int i=0;i<sa.size();i++) {
+					debug(sa.get(i));
+					if(sa.get(i)==null) {
+						break;
+					}
+					URL u2=new URL(sa.get(i));
+					HttpURLConnection c2 = (HttpURLConnection) u2.openConnection();
+					c2.setDoInput(true);
+					c2.connect();
+					//c2.setUseCaches(true);
+					InputStream i2 = c2.getInputStream();
+					ba.add(BitmapFactory.decodeStream(i2));
+					c2.disconnect();
+					i2.close();
+				}
+				if(b!=null && ba!=null) {
+					debug("ba set!");
 					setWidget(this.h, b);
 				} else {
 					setWidget(this.h, null);					
@@ -162,11 +192,12 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 			}
 		} catch(Exception e) {
 			setWidget(h, null);
-			debug("Could not get weather icon" + e.toString());
+			debug("Could not get y" + e.toString());
 		}
 	}
 	
 	
+
 	//send update intent to update service
 	private void updateWeather(Location myl) {
 		Intent mintent = new Intent(this.context, WWUpdate.class);
@@ -223,6 +254,10 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 			}
 			if(intent.hasExtra("b")) {
 				mintent.putExtra("b", (Bitmap) intent.getParcelableExtra("b"));
+			}
+			if(intent.hasExtra("ba")) {
+				debug("baba");
+				mintent.putExtra("ba", intent.getParcelableExtra("ba"));
 			}
 			context.startActivity(mintent);
 		}

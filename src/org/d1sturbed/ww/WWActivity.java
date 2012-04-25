@@ -1,9 +1,13 @@
 package org.d1sturbed.ww;
 
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.widget.TextView;
@@ -31,8 +35,8 @@ public class WWActivity extends Activity {
 		} catch (NameNotFoundException e) {
 			Log.v("WWActivity", e.toString());
 		}
-		Log.v("icky", extras.get("h").toString());
 		WWBaseHandler h=(WWBaseHandler) extras.getSerializable("h");
+		//h.
 		TextView tv= (TextView) findViewById(R.id.widget_textview);
 		tv.setMovementMethod(LinkMovementMethod.getInstance());
 		tv.setText(h.getDesc()+"\n\nVersion: "+ver+"-"+name);

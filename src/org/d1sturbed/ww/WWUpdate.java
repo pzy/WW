@@ -1,8 +1,5 @@
 package org.d1sturbed.ww;
 
-import java.io.DataInputStream;
-import java.net.URL;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -61,35 +58,11 @@ public class WWUpdate extends IntentService implements Runnable {
 	
 
 	
-	//getWoeID by Location from yahoos
-	public long getWoeID(Location location) throws Exception {
-		debug(context.toString());
-		DataInputStream theHTML;
-		String thisLine = "";
-		StringBuffer sb = new StringBuffer();
 
-		debug("http://where.yahooapis.com/geocode?location="
-				+ String.valueOf(location.getLatitude()) + "+"
-				+ String.valueOf(location.getLongitude())
-				+ "&locale=de_DE&gflags=R&flags=J");
-		URL u = new URL("http://where.yahooapis.com/geocode?location="
-				+ String.valueOf(location.getLatitude()) + "+"
-				+ String.valueOf(location.getLongitude())
-				+ "&locale=de_DE&gflags=R&flags=J");
-		theHTML = new DataInputStream(u.openStream());
-		while ((thisLine = theHTML.readLine()) != null) {
-			sb.append(thisLine);
-		}
-		String pat = ".*(,\"woeid\":)(.+?)(,\"woetype).*";
-		thisLine = new String(sb).replaceAll("\\r\\n|\\r|\\n|\\t|\\ ", "");
-		thisLine = thisLine.replaceAll(pat, "$2");
-		return Long.parseLong(thisLine);
-	}
 	
 	//fetch weather by woeid from yahoos weather api
 	@Override
 	public void run() {
-		URL u;
 		debug("run()");
 		WWBaseHandler h;
 		try {
@@ -98,32 +71,23 @@ public class WWUpdate extends IntentService implements Runnable {
 			}
 			switch(PROVIDER) {
 				case 0:
-					long woeid = 0;
-					h = new WWYahooHandler();			
-					//getWoeID from yahoos geocoding api
-					woeid = getWoeID(this.lo);
-					//get weather xml for current location
-					u = new URL("http://weather.yahooapis.com/forecastrss?w="
-						+ String.valueOf(woeid) + "&u=c");
+					h = new WWYahooHandler();		
 					break;
 				case 1:
 					h = new WWGoogleHandler();	
-					u= new URL("http://www.google.com/ig/api?weather=,,,"+ String.format("%.0f", lo.getLatitude()*1000000) + ","
-					+ String.format("%.0f", lo.getLongitude()*1000000));
-					 break;
+					break;
 				 default:
-					 h=null;
-					 u=null;
-					 break;
+					h=null;
+					break;
 			}
-			if(u==null || h==null) {
+			if(h.getUrl(lo)==null || h==null) {
 				return;
 			}
-			debug(u.toString());
+			//debug(u.toString());
 			SAXParserFactory spf = SAXParserFactory.newInstance();
 			SAXParser sp = null;
 			sp = spf.newSAXParser();
-			sp.parse(u.openStream(), h);
+			sp.parse(h.getUrl(lo).openStream(), h);
 			debug(caller);
 			//send intent with weather data to widget
 			Intent mintent = new Intent(context, Class.forName(caller));

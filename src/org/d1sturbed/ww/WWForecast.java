@@ -2,6 +2,8 @@ package org.d1sturbed.ww;
 
 import java.io.Serializable;
 
+import android.util.Log;
+
 public class WWForecast implements Serializable {
 
 	private static final long serialVersionUID = -8778026920747731489L;
@@ -30,9 +32,14 @@ public class WWForecast implements Serializable {
 		this.low = low;
 	}
 	public String getIcon() {
-		return icon;
+		if(this.icon!=null) {
+			return "http://www.google.com"+this.icon;
+		} else {
+			return null;
+		}
 	}
 	public void setIcon(String icon) {
+		Log.v("licky", icon);
 		this.icon = icon;
 	}
 	public String getCondition() {

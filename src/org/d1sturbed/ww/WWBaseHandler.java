@@ -1,9 +1,14 @@
 package org.d1sturbed.ww;
 
 import java.io.Serializable;
+import java.net.URL;
+import java.util.ArrayList;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import android.location.Location;
 import android.util.Log;
 
 public abstract class WWBaseHandler extends DefaultHandler implements Serializable {
@@ -18,7 +23,6 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	private char tempUnit='C';
 	private int temperature;
 	private String pic;
-	private String url;
 	private String iconid;
 	private String sunrise;
 	private String sunset;
@@ -130,16 +134,9 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 		this.pic = pic;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
 	
 	public String toString() {
-		return getDesc()+":"+getUrl()+":"+getPic()+"";
+		return getDesc()+":"+getPic()+"";
 		
 	}
 
@@ -192,4 +189,10 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	public void setSunset(String sunset) {
 		this.sunset = sunset;
 	}
+
+
+	abstract public URL getUrl(Location lo);
+
+
+	abstract public ArrayList<String> getForcecastPics();
 }
