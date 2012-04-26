@@ -50,7 +50,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	private String sunrise;
 	private String sunset;
 	private String location;
-	private ArrayList<WWForecast> wwf;
+
 	private WWForecast f;
 	
 	private int low_temp=0;

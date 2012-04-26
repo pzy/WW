@@ -14,8 +14,14 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int widget_imageview=0x7f060000;
-        public static final int widget_textview=0x7f060001;
+        public static final int cond=0x7f060004;
+        public static final int day=0x7f060005;
+        public static final int high=0x7f060002;
+        public static final int imageview=0x7f060000;
+        public static final int ll=0x7f060001;
+        public static final int low=0x7f060003;
+        public static final int widget_imageview=0x7f060006;
+        public static final int widget_textview=0x7f060007;
     }
     public static final class layout {
         public static final int dialog=0x7f030000;

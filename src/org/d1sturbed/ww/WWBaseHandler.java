@@ -27,7 +27,9 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	private String sunrise;
 	private String sunset;
 	private String location;
+	protected ArrayList<WWForecast> wwf;
 	
+
 	private int low_temp=0;
 	private int high_temp=0;
 	public static final boolean DEBUG = WW.DEBUG;
@@ -195,4 +197,8 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 
 
 	abstract public ArrayList<String> getForcecastPics();
+	
+	public ArrayList<WWForecast> getWwf() {
+		return wwf;
+	}
 }

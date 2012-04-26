@@ -25,7 +25,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -45,6 +44,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	//layout of the widget
 	protected int l;
 	//location
+	ArrayList<Bitmap> ba;
 	protected Location lo;
 
 
@@ -101,6 +101,10 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		intent.putExtra("h", ha);
 		if(b!=null) {
 			intent.putExtra("b", b);	
+		}
+		
+		if(ba!=null) {
+			intent.putParcelableArrayListExtra("ba", ba);
 		}
 
 		pendingShowActivityIntent = PendingIntent.getBroadcast(context, new Random().nextInt(),	intent, 0);
@@ -165,7 +169,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				connection.disconnect();
 				input.close();
 				debug(h.getPic());
-				ArrayList<Bitmap> ba=new ArrayList<Bitmap>();
+				ba=new ArrayList<Bitmap>();
 				ArrayList<String> sa=h.getForcecastPics();
 				debug(sa.size()+"-");
 				for(int i=0;i<sa.size();i++) {
@@ -183,8 +187,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 					c2.disconnect();
 					i2.close();
 				}
-				if(b!=null && ba!=null) {
-					debug("ba set!");
+				if(b!=null) {
 					setWidget(this.h, b);
 				} else {
 					setWidget(this.h, null);					
@@ -235,11 +238,13 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		if(intent.getAction().equals("android.appwidget.action.APPWIDGET_UPDATE")) {
 			LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 			Location myl=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000000, 1000, w);
+			
+			if(android.os.Build.VERSION.SDK_INT<=android.os.Build.VERSION_CODES.GINGERBREAD) {
+				locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000000, 1000, w);
+			}
 			if(myl!=null) {
 				w.updateWeather(myl);
 			}
-			
 		//widget view update
 		} else if (intent.getAction().equals(WW.ACTION_WIDGET_SWITCH)) {
 			if(w!=null) {
@@ -256,8 +261,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				mintent.putExtra("b", (Bitmap) intent.getParcelableExtra("b"));
 			}
 			if(intent.hasExtra("ba")) {
-				debug("baba");
-				mintent.putExtra("ba", intent.getParcelableExtra("ba"));
+				mintent.putParcelableArrayListExtra("ba", intent.getParcelableArrayListExtra("ba"));
 			}
 			context.startActivity(mintent);
 		}
