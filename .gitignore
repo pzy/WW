@@ -1,4 +1,2 @@
-.svn
-.classpath
-.gitignore
-.project
+gen
+bin
