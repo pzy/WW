@@ -58,11 +58,11 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		}
 	}
    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
-                .getHeight(), Config.ARGB_8888);
+        Bitmap output = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), false);
+        
         Canvas canvas = new Canvas(output);
 
-        final int color = 0xff424242;
+        final int color = 0xffffffff;
         final Paint paint = new Paint();
         final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
         final RectF rectF = new RectF(rect);
@@ -76,7 +76,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
         paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
-        return Bitmap.createScaledBitmap(output, 70, 70, false);
+        return output;
     }
    
     
