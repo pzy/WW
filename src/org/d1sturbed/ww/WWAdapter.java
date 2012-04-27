@@ -17,8 +17,7 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter,
-		Runnable {
+public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter {
 	ArrayList<WWForecast> wwf;
 	ArrayList<Bitmap> ba = new ArrayList<Bitmap>();
 	WWBaseHandler h;
@@ -35,7 +34,6 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter,
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
 		WWForecast p = null;
-		Bitmap b = null;
 		if (v == null) {
 			LayoutInflater vi = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -47,12 +45,9 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter,
 		TextView st = (TextView) v.findViewById(R.id.day);
 		ImageView image = (ImageView) v.findViewById(R.id.imageview);
 		p = wwf.get(position);
-		if (ba.size() > position) {
-			b = ba.get(position);
-		}
 		if (p != null) {
-			if (image!=null && b != null) {
-				image.setImageBitmap(b);
+			if (image!=null && p.getIcon()!=null) {
+				image.setImageBitmap(get(h.getPic(p.getIcon())));
 			}
 			if (tt != null) {
 				tt.setTextColor(Color.RED);
@@ -76,35 +71,26 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter,
 		return v;
 	}
 
-	@Override
-	public void run() {
-		ArrayList<String> sa = h.getForecastPics();
-		URL u2;
-		if (sa != null) {
-			for (int i = 0; i < sa.size(); i++) {
-				if (sa.get(i) == null) {
-					break;
-				}
 
-				try {
-					u2 = new URL(sa.get(i));
+	public Bitmap get(String img) {
+		Bitmap b;
+		try {
+			URL u2 = new URL(img);
 
-					HttpURLConnection c2 = (HttpURLConnection) u2
-							.openConnection();
-					c2.setUseCaches(true);
-					c2.setDoInput(true);
-					c2.connect();
-					InputStream i2 = c2.getInputStream();
-					ba.add(Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false));
-					c2.disconnect();
-					i2.close();
-				} catch (Exception e) {
-					Log.v("WWAdapter", e.toString());
-				}
-
-			}
+			HttpURLConnection c2 = (HttpURLConnection) u2
+					.openConnection();
+			c2.setUseCaches(true);
+			c2.setDoInput(true);
+			c2.connect();
+			InputStream i2 = c2.getInputStream();
+			c2.disconnect();
+			i2.close();
+			b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);			
+		} catch (Exception e) {
+			Log.v("WWAdapter", e.toString());
+			b=null;
 		}
+		return b;
 
 	}
-
 }

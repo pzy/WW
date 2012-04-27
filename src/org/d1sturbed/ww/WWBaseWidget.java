@@ -21,6 +21,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -31,7 +32,7 @@ import android.widget.RemoteViews;
 public abstract class WWBaseWidget extends AppWidgetProvider implements LocationListener,Runnable {
 	
 	//debugging
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 	public static final String TAG = "WWBaseWidget";
 	//intent actions
 	public static final String ACTION_WIDGET_SWITCH = "WW.ACTION_WIDGET_SWITCH";
@@ -168,7 +169,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				Bitmap b=BitmapFactory.decodeStream(input);
 				connection.disconnect();
 				input.close();
-				debug(h.getPic());
+				debug(h.getPic(h.getPic()));
 				ba=new ArrayList<Bitmap>();
 				if(b!=null) {
 					setWidget(this.h, b);
@@ -220,12 +221,13 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		//weather data update 
 		if(intent.getAction().equals("android.appwidget.action.APPWIDGET_UPDATE")) {
 			LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+			Criteria c=new Criteria();
+			c.setAccuracy(Criteria.POWER_LOW);
 			Location myl=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			
-			if(android.os.Build.VERSION.SDK_INT<=android.os.Build.VERSION_CODES.GINGERBREAD) {
 				locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000000, 1000, w);
-			}
 			if(myl!=null) {
+				debug("updating widget");
 				w.updateWeather(myl);
 			}
 		//widget view update

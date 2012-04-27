@@ -127,9 +127,9 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	public void setHigh_temp(int high_temp) {
 		this.high_temp = high_temp;
 	}
-
+	abstract public String getPic(String pic);
 	public String getPic() {
-		return pic;
+		return this.pic;
 	}
 
 	public void setPic(String pic) {

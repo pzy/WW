@@ -309,7 +309,7 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 		ArrayList<String> al=new ArrayList<String>();
 		for(int i=0;i<wwf.size();i++) {
 			debug(wwf.get(i).getIcon());
-			al.add("http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+wwf.get(i).getIcon()+"d.png");
+			al.add(getPic(wwf.get(i).getIcon()));
 		}
 		return al;
 	}
@@ -320,6 +320,15 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 
 	public void setHumidity(int humidity) {
 		this.humidity = humidity;
+	}
+
+	private String getPic(int pic) {
+		return "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+String.valueOf(pic)+"d.png";
+	}
+	
+	@Override
+	public String getPic(String pic) {
+		return "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+pic+"d.png";
 	}
 
 	

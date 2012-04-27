@@ -100,9 +100,9 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 			current=true;
 			debug("hit");
 		} else if(localName.equals(TEMPTAG) && interested && current) {
-			    temperature=Integer.parseInt(atts.getValue("data"));
+		    temperature=Integer.parseInt(atts.getValue("data"));
 		} else if(localName.equals(PICTAG) && interested && current) {
-				pic=atts.getValue("data");
+			pic=atts.getValue("data");
 		} else if(localName.equals(HUMTAG) && interested && current) {
 			setHumidity(atts.getValue("data"));
 		} else if(localName.equals(FORETAG)) {
@@ -201,12 +201,8 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 		this.high_temp = high_temp;
 	}
 
-	public String getPic() {
+	public String getPic(String pic) {
 		return "http://www.google.com"+pic;
-	}
-
-	public void setPic(String pic) {
-		this.pic = pic;
 	}
 
 	public String toString() {
@@ -293,7 +289,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 		ArrayList<String> al=new ArrayList<String>();
 		for(int i=0;i<wwf.size();i++) {
 			debug(wwf.get(i).getIcon());
-			al.add("http://www.google.com"+wwf.get(i).getIcon());
+			al.add(getPic(wwf.get(i).getIcon()));
 		}
 		return al;
 	}

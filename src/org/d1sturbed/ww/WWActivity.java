@@ -27,7 +27,6 @@ public class WWActivity extends ListActivity {
 		Bundle extras=getIntent().getExtras();
 		WWBaseHandler h=(WWBaseHandler) extras.getSerializable("h");
 		WWAdapter wwa=new WWAdapter(getApplicationContext(), R.layout.dialog, h);
-		wwa.run();
 		setListAdapter(wwa);
 		super.onCreate(savedInstanceState);
 	}
