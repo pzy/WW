@@ -1,5 +1,7 @@
 package org.d1sturbed.ww;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -85,7 +87,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
    
     
 	//update the widget data
-	protected void setWidget(WWBaseHandler ha, Bitmap b) {
+	protected void setWidget(Bitmap b) {
 		RemoteViews updateViews;
 		AppWidgetManager manager;
 		ComponentName widget;
@@ -99,15 +101,13 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		PendingIntent pendingShowActivityIntent;
 		Intent intent = new Intent(context, getClass());
 		intent.setAction(WWBaseWidget.ACTION_START_ACTIVITY);
-		intent.putExtra("h", ha);
+		if(h!=null) {
+			intent.putExtra("h", h);
+		}
 		if(b!=null) {
 			intent.putExtra("b", b);	
 		}
 		
-		if(ba!=null) {
-			intent.putParcelableArrayListExtra("ba", ba);
-		}
-
 		pendingShowActivityIntent = PendingIntent.getBroadcast(context, new Random().nextInt(),	intent, 0);
 		updateViews.setOnClickPendingIntent(R.id.widget_textview, pendingShowActivityIntent);
 		
@@ -117,7 +117,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				updateViews.setImageViewBitmap(R.id.widget_imageview, getRoundedCornerBitmap(b, 15));
 				updateViews.setInt(R.id.widget_imageview, "setAlpha", 50);
 			}
-			updateViews.setTextViewText(R.id.widget_textview, ha.getShortString());
+			updateViews.setTextViewText(R.id.widget_textview, h.getShortString());
 		} catch (Exception e) {
 			debug("Fehler: " + e.toString());
 			updateViews.setTextViewText(R.id.widget_textview, "Fehler:" + e.toString());
@@ -160,7 +160,8 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 	public void run() {
 		try {
 			if(h!=null) {
-				URL u=new URL(h.getPic());
+				debug(h.toString());
+				URL u=new URL(h.getPicUrl(h.getPic()));
 				HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 				connection.setUseCaches(true);
 				connection.setDoInput(true);
@@ -169,17 +170,39 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				Bitmap b=BitmapFactory.decodeStream(input);
 				connection.disconnect();
 				input.close();
-				debug(h.getPic(h.getPic()));
+				debug(h.getPicUrl(h.getPic()));
 				ba=new ArrayList<Bitmap>();
+				for(int i=0;i<h.getForecastPics().size();i++) {
+					File cacheDir = context.getCacheDir();
+					File tmp=new File(h.getWwf().get(i).getIcon());
+                    File f = new File(cacheDir, tmp.getName());
+                    if(f.exists()) {
+                    	continue;
+                    }
+                    FileOutputStream out = new FileOutputStream(f);
+					String img=h.getForecastPics().get(i);
+					URL u2 = new URL(img);
+	
+					HttpURLConnection c2 = (HttpURLConnection) u2
+							.openConnection();
+					c2.setUseCaches(true);
+					c2.setDoInput(true);
+					c2.connect();
+					InputStream i2 = c2.getInputStream();
+					b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);
+					b.compress(Bitmap.CompressFormat.PNG, 1, out);
+					c2.disconnect();
+					i2.close();
+				}
 				if(b!=null) {
-					setWidget(this.h, b);
+					setWidget(b);
 				} else {
-					setWidget(this.h, null);					
+					setWidget(null);					
 				}
 			}
 		} catch(Exception e) {
-			setWidget(h, null);
-			debug("Could not get y" + e.toString());
+			setWidget(null);
+			debug("Could not get:" + e.toString());
 		}
 	}
 	
@@ -244,9 +267,6 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 			}
 			if(intent.hasExtra("b")) {
 				mintent.putExtra("b", (Bitmap) intent.getParcelableExtra("b"));
-			}
-			if(intent.hasExtra("ba")) {
-				mintent.putParcelableArrayListExtra("ba", intent.getParcelableArrayListExtra("ba"));
 			}
 			context.startActivity(mintent);
 		}

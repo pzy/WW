@@ -1,5 +1,8 @@
 package org.d1sturbed.ww;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -47,7 +50,22 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter {
 		p = wwf.get(position);
 		if (p != null) {
 			if (image!=null && p.getIcon()!=null) {
-				image.setImageBitmap(get(h.getPic(p.getIcon())));
+				File tmp=null;
+				File f =null;
+				tmp = new File(p.getIcon());
+				File cacheDir = context.getCacheDir();
+				if(tmp!=null) {
+					f = new File(cacheDir, tmp.getName());
+				}
+                if(f!=null && f.exists()) {
+                	try {
+						image.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(f)));
+					} catch (FileNotFoundException e) {
+	                	image.setImageBitmap(get(h.getPicUrl(p.getIcon())));						
+					}
+                } else {
+                	image.setImageBitmap(get(h.getPicUrl(p.getIcon())));
+                }
 			}
 			if (tt != null) {
 				tt.setTextColor(Color.RED);
@@ -83,9 +101,10 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter {
 			c2.setDoInput(true);
 			c2.connect();
 			InputStream i2 = c2.getInputStream();
+			b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);
 			c2.disconnect();
 			i2.close();
-			b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);			
+			
 		} catch (Exception e) {
 			Log.v("WWAdapter", e.toString());
 			b=null;

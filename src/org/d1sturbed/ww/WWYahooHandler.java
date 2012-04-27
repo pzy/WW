@@ -115,10 +115,10 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	public void startElement(String namespaceURI, String localName,String qName, Attributes atts) throws SAXException {
 		data=null;
 		if(localName.equals(TEMPTAG)){
-			temperature=Integer.parseInt(atts.getValue(TEMP));
+			setTemperature(Integer.parseInt(atts.getValue(TEMP)));
 			setIconid(atts.getValue(ICONID));
 		} else if(localName.equals(HUMTAG)) {
-			humidity=Integer.parseInt(atts.getValue(HUM));
+			setHumidity(Integer.parseInt(atts.getValue(HUM)));
 		} else if(localName.equals(FORETAG)) {
 			WWForecast wf=new WWForecast();
 			wf.setLow(Integer.parseInt(atts.getValue(LOW)));
@@ -216,12 +216,9 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	}
 
 	public String getPic() {
-		String picurl = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+getIconid();
-		if(isDay()) {
-			return picurl+"d.png";					
-		} else {
-			return picurl+"n.png";
-		}
+		String picurl = String.valueOf(getIconid());
+		debug(picurl);
+		return picurl;
 	}
 
 
@@ -309,9 +306,13 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 		ArrayList<String> al=new ArrayList<String>();
 		for(int i=0;i<wwf.size();i++) {
 			debug(wwf.get(i).getIcon());
-			al.add(getPic(wwf.get(i).getIcon()));
+			al.add(getPicUrl(wwf.get(i).getIcon()));
 		}
 		return al;
+	}
+
+	public String getPicUrl(String icon) {
+		return "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+icon+"d.png";
 	}
 
 	public int getHumidity() {
@@ -320,15 +321,6 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 
 	public void setHumidity(int humidity) {
 		this.humidity = humidity;
-	}
-
-	private String getPic(int pic) {
-		return "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+String.valueOf(pic)+"d.png";
-	}
-	
-	@Override
-	public String getPic(String pic) {
-		return "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+pic+"d.png";
 	}
 
 	

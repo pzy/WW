@@ -22,11 +22,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	private String data;
 	private char tempUnit='C';
 	private int temperature;
-	private String pic;
-	private String iconid;
-	private String sunrise;
-	private String sunset;
-	private String location;
+	protected String pic;
 	protected ArrayList<WWForecast> wwf=new ArrayList<WWForecast>();
 	
 
@@ -127,7 +123,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	public void setHigh_temp(int high_temp) {
 		this.high_temp = high_temp;
 	}
-	abstract public String getPic(String pic);
+	
 	public String getPic() {
 		return this.pic;
 	}
@@ -143,26 +139,6 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	}
 
 
-	public String getLocation() {
-		return location;
-	}
-
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
-
-	public String getIconid() {
-		return iconid;
-	}
-
-
-	public void setIconid(String iconid) {
-		this.iconid = iconid;
-	}
-
-
 	public char getTempUnit() {
 		return tempUnit;
 	}
@@ -173,24 +149,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	}
 
 
-	public String getSunrise() {
-		return sunrise;
-	}
 
-
-	public void setSunrise(String sunrise) {
-		this.sunrise = sunrise;
-	}
-
-
-	public String getSunset() {
-		return sunset;
-	}
-
-
-	public void setSunset(String sunset) {
-		this.sunset = sunset;
-	}
 
 
 	abstract public URL getUrl(Location lo);
@@ -201,4 +160,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	public ArrayList<WWForecast> getWwf() {
 		return wwf;
 	}
+
+
+	public abstract String getPicUrl(String pic);
 }

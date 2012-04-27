@@ -18,6 +18,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	 * handler for parsing xml
 	 */
 	private static final long serialVersionUID = 4793473735545011541L;
+	private final String TAG="WWGoogleHandler";
 	private final String CURRENTTAG = "current_conditions";
 	private final String TEMPTAG = "temp_c";
 	private final String HUMTAG = "humidity";
@@ -44,7 +45,6 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	private char tempUnit='C';
 	private boolean current;
 	private int temperature;
-	private String pic;
 	private String humidity;
 	private String iconid;
 	private String sunrise;
@@ -56,7 +56,6 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	private int low_temp=0;
 	private int high_temp=0;
 	public static final boolean DEBUG = WW.DEBUG;
-	public static final String TAG = "WWHandler";
 
 
 	protected void debug(String msg) {
@@ -94,7 +93,6 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	@Override
 	public void startElement(String namespaceURI, String localName,String qName, Attributes atts) throws SAXException {
 		data=null;
-		Log.d("icky", localName);
 		if(localName.equals(CURRENTTAG)){
 			interested=true;
 			current=true;
@@ -102,7 +100,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 		} else if(localName.equals(TEMPTAG) && interested && current) {
 		    temperature=Integer.parseInt(atts.getValue("data"));
 		} else if(localName.equals(PICTAG) && interested && current) {
-			pic=atts.getValue("data");
+			setPic(atts.getValue("data"));
 		} else if(localName.equals(HUMTAG) && interested && current) {
 			setHumidity(atts.getValue("data"));
 		} else if(localName.equals(FORETAG)) {
@@ -110,12 +108,10 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 			current=false;
 			f=new WWForecast();
 		} else if(localName.equals(HIGHTAG) && interested && !current) {
-			debug("licky: " + atts.getValue("data"));
 			f.setHigh((Integer.parseInt(atts.getValue("data"))-32)*5/9);
 		} else if(localName.equals(LOWTAG) && interested && !current) {
 			f.setLow((Integer.parseInt(atts.getValue("data"))-32)*5/9);
 		} else if(localName.equals(PICTAG) && interested && !current) {
-			debug("licky: " + atts.getValue("data"));
 			f.setIcon(atts.getValue("data"));
 		} else if(localName.equals(CONDITIONTAG) && interested && !current) {
 			f.setCondition(atts.getValue("data"));
@@ -137,6 +133,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	}
 	
 	public String getShortString() {
+		debug(getPic());
 		return "Temp: "+getTemperature()+"°"+getTempUnit()+" \n"+getHumidity().replaceAll("Humidity:", "Hum:");
 	}
  
@@ -199,10 +196,6 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 
 	public void setHigh_temp(int high_temp) {
 		this.high_temp = high_temp;
-	}
-
-	public String getPic(String pic) {
-		return "http://www.google.com"+pic;
 	}
 
 	public String toString() {
@@ -289,8 +282,14 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 		ArrayList<String> al=new ArrayList<String>();
 		for(int i=0;i<wwf.size();i++) {
 			debug(wwf.get(i).getIcon());
-			al.add(getPic(wwf.get(i).getIcon()));
+			al.add(getPicUrl(wwf.get(i).getIcon()));
 		}
 		return al;
+	}
+
+
+	@Override
+	public String getPicUrl(String pic) {
+		return "http://www.google.com"+pic;
 	}
 }
