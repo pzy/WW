@@ -16,6 +16,9 @@ public class WWUpdate extends IntentService implements Runnable {
 	public static final String UPDATE = "WWupdate.UPDATE";
 	//save Application context
 	private Context context=null;
+	//change provider
+	// 0 - YahooWeather
+	// 1 - GoogleWeather
 	private int PROVIDER=1;
 	//debug
 	public static final boolean DEBUG = WW.DEBUG;

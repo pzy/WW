@@ -33,7 +33,7 @@ public class WWForecast implements Serializable {
 	}
 	public String getIcon() {
 		if(this.icon!=null) {
-			return "http://www.google.com"+this.icon;
+			return this.icon;
 		} else {
 			return null;
 		}

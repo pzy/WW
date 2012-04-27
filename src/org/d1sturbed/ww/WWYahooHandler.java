@@ -27,6 +27,11 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	private final String UNITTAG = "units";
 	private final String TEMP  = "temp";
 	private final String LOW = "low";
+	private final String HUMTAG = "atmosphere";
+	private final String HUM = "humidity";
+	private final String DAY = "day";
+	private final String CODE = "code";
+	private final String CONDITION = "text";
 	private final String CITY = "city";
 	private final String ICONID = "code";
 	private final String TEMPUNIT = "temperature";
@@ -39,6 +44,7 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	private char tempUnit='C';
 	private int temperature;
 	private String desc;
+	private int humidity;
 	private String url;
 	private String iconid;
 	private String sunrise;
@@ -111,11 +117,16 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 		if(localName.equals(TEMPTAG)){
 			temperature=Integer.parseInt(atts.getValue(TEMP));
 			setIconid(atts.getValue(ICONID));
+		} else if(localName.equals(HUMTAG)) {
+			humidity=Integer.parseInt(atts.getValue(HUM));
 		} else if(localName.equals(FORETAG)) {
-			if(low_temp==0 && high_temp==0) {
-				low_temp = Integer.parseInt(atts.getValue(LOW));
-				high_temp = Integer.parseInt(atts.getValue(HIGH));
-			}
+			WWForecast wf=new WWForecast();
+			wf.setLow(Integer.parseInt(atts.getValue(LOW)));
+			wf.setCondition(atts.getValue(CONDITION));
+			wf.setHigh(Integer.parseInt(atts.getValue(HIGH)));
+			wf.setDay(atts.getValue(DAY));
+			wf.setIcon(atts.getValue(CODE));
+			wwf.add(wf);
 		} else if(localName.equals(PICTAG)) {
 			interested=true;
 		} else if(localName.equals(LINKTAG)) {
@@ -274,10 +285,8 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	}
 
 
-	@Override
 	public String getShortString() {
-		// TODO Auto-generated method stub
-		return "Act: "+ getTemperature()+" °"+getTempUnit()+"\nN: "+ getLow_temp()+" °"+getTempUnit()+"\nH: "+getHigh_temp()+" °"+getTempUnit();
+		return "Temp: "+getTemperature()+"°"+getTempUnit()+" \nHum: "+getHumidity();
 	}
 
 	@Override
@@ -296,9 +305,21 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	}
 
 	@Override
-	public ArrayList<String> getForcecastPics() {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<String> getForecastPics() {
+		ArrayList<String> al=new ArrayList<String>();
+		for(int i=0;i<wwf.size();i++) {
+			debug(wwf.get(i).getIcon());
+			al.add("http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/"+wwf.get(i).getIcon()+"d.png");
+		}
+		return al;
+	}
+
+	public int getHumidity() {
+		return humidity;
+	}
+
+	public void setHumidity(int humidity) {
+		this.humidity = humidity;
 	}
 
 	

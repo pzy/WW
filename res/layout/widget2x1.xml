@@ -8,17 +8,17 @@
     android:padding="3dip"
     android:background="@layout/radius" >
 
-      
        <ImageView
            android:id="@+id/widget_imageview"
-           android:scaleType="fitCenter"
-           android:layout_weight=".4"
            android:layout_width="0dp"
            android:layout_height="fill_parent"
            android:layout_gravity="right|center_vertical"
+           android:layout_margin="6dp"
+           android:layout_weight="0.29"
            android:contentDescription="@string/image"
            android:padding="6dp"
-           android:layout_margin="6dp" />
+           android:scaleType="centerCrop" />
+
 <TextView
            android:id="@+id/widget_textview"
            android:layout_width="0dp"

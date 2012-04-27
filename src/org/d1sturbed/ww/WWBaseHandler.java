@@ -27,7 +27,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	private String sunrise;
 	private String sunset;
 	private String location;
-	protected ArrayList<WWForecast> wwf;
+	protected ArrayList<WWForecast> wwf=new ArrayList<WWForecast>();
 	
 
 	private int low_temp=0;
@@ -196,7 +196,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	abstract public URL getUrl(Location lo);
 
 
-	abstract public ArrayList<String> getForcecastPics();
+	abstract public ArrayList<String> getForecastPics();
 	
 	public ArrayList<WWForecast> getWwf() {
 		return wwf;

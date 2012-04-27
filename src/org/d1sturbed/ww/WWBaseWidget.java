@@ -31,8 +31,8 @@ import android.widget.RemoteViews;
 public abstract class WWBaseWidget extends AppWidgetProvider implements LocationListener,Runnable {
 	
 	//debugging
-	public static final boolean DEBUG = true;
-	public static final String TAG = "WW";
+	public static final boolean DEBUG = false;
+	public static final String TAG = "WWBaseWidget";
 	//intent actions
 	public static final String ACTION_WIDGET_SWITCH = "WW.ACTION_WIDGET_SWITCH";
 	public static String ACTION_START_ACTIVITY = "WW.ACTION_START_ACTIVITY";
@@ -79,7 +79,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
         paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
-        return output;
+        return Bitmap.createScaledBitmap(output, 70, 70, false);
     }
    
     
@@ -161,32 +161,15 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 			if(h!=null) {
 				URL u=new URL(h.getPic());
 				HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+				connection.setUseCaches(true);
 				connection.setDoInput(true);
 				connection.connect();
-				//connection.setUseCaches(true);
 				InputStream input = connection.getInputStream();
 				Bitmap b=BitmapFactory.decodeStream(input);
 				connection.disconnect();
 				input.close();
 				debug(h.getPic());
 				ba=new ArrayList<Bitmap>();
-				ArrayList<String> sa=h.getForcecastPics();
-				debug(sa.size()+"-");
-				for(int i=0;i<sa.size();i++) {
-					debug(sa.get(i));
-					if(sa.get(i)==null) {
-						break;
-					}
-					URL u2=new URL(sa.get(i));
-					HttpURLConnection c2 = (HttpURLConnection) u2.openConnection();
-					c2.setDoInput(true);
-					c2.connect();
-					//c2.setUseCaches(true);
-					InputStream i2 = c2.getInputStream();
-					ba.add(BitmapFactory.decodeStream(i2));
-					c2.disconnect();
-					i2.close();
-				}
 				if(b!=null) {
 					setWidget(this.h, b);
 				} else {

@@ -289,11 +289,11 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 
 
 	@Override
-	public ArrayList<String> getForcecastPics() {
+	public ArrayList<String> getForecastPics() {
 		ArrayList<String> al=new ArrayList<String>();
 		for(int i=0;i<wwf.size();i++) {
 			debug(wwf.get(i).getIcon());
-			al.add(wwf.get(i).getIcon());
+			al.add("http://www.google.com"+wwf.get(i).getIcon());
 		}
 		return al;
 	}
