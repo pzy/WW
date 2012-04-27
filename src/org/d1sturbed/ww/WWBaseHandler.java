@@ -1,6 +1,11 @@
 package org.d1sturbed.ww;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -8,6 +13,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.util.Log;
 
@@ -33,6 +41,43 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	
 	public abstract String getShortString();
 
+	
+	public void Cache(Context context, String icon) throws Exception {
+		File tmp=new File(icon);
+        File f = new File(context.getCacheDir(), tmp.getName());
+        Bitmap b=null;
+        if(f.exists()) {
+        	return;
+        }
+        FileOutputStream out = new FileOutputStream(f);
+		String img=getPicUrl(icon);
+		URL u2 = new URL(img);
+
+		HttpURLConnection c2 = (HttpURLConnection) u2
+				.openConnection();
+		c2.setUseCaches(true);
+		c2.setDoInput(true);
+		c2.connect();
+		InputStream i2 = c2.getInputStream();
+		b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);
+		b.compress(Bitmap.CompressFormat.PNG, 1, out);
+		c2.disconnect();
+		i2.close();
+	}
+
+
+	public Bitmap fromCache(Context context, String name) throws Exception {
+		File tmp=null;
+		File f =null;
+		tmp = new File(name);
+		File cacheDir = context.getCacheDir();
+		if(tmp!=null) {
+			f = new File(cacheDir, tmp.getName());
+		} 
+		debug("fromCache("+tmp.getName()+")");
+		return BitmapFactory.decodeStream(new FileInputStream(f));
+	}
+	
 	
 	protected void debug(String msg) {
 		if (DEBUG) {
@@ -163,4 +208,27 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 
 
 	public abstract String getPicUrl(String pic);
+
+
+	public void getImages(Context context) throws Exception {
+		/*URL u=new URL(getPicUrl(getPic()));
+		HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+		connection.setUseCaches(true);
+		connection.setDoInput(true);
+		connection.connect();
+		InputStream input = connection.getInputStream();
+		Bitmap b=BitmapFactory.decodeStream(input);
+		connection.disconnect();
+		input.close();*/
+		Cache(context, getPic());
+		debug(getPicUrl(getPic()));
+		for(int i=0;i<getWwf().size();i++) {
+			try {
+				 Cache(context, getWwf().get(i).getIcon());
+			} catch(Exception e) {
+				debug("Could not cache image"+getWwf().get(i).getIcon());
+			}
+		}
+		
+	}
 }

@@ -1,10 +1,5 @@
 package org.d1sturbed.ww;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 import android.graphics.PorterDuff.Mode;
@@ -17,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuffXfermode;
@@ -152,48 +146,14 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		// TODO Auto-generated method stub
 		
 	}
-
-
-
+	
 	@Override
 	//get Weather icon and update Widget
 	public void run() {
 		try {
 			if(h!=null) {
-				debug(h.toString());
-				URL u=new URL(h.getPicUrl(h.getPic()));
-				HttpURLConnection connection = (HttpURLConnection) u.openConnection();
-				connection.setUseCaches(true);
-				connection.setDoInput(true);
-				connection.connect();
-				InputStream input = connection.getInputStream();
-				Bitmap b=BitmapFactory.decodeStream(input);
-				connection.disconnect();
-				input.close();
-				debug(h.getPicUrl(h.getPic()));
-				ba=new ArrayList<Bitmap>();
-				for(int i=0;i<h.getForecastPics().size();i++) {
-					File cacheDir = context.getCacheDir();
-					File tmp=new File(h.getWwf().get(i).getIcon());
-                    File f = new File(cacheDir, tmp.getName());
-                    if(f.exists()) {
-                    	continue;
-                    }
-                    FileOutputStream out = new FileOutputStream(f);
-					String img=h.getForecastPics().get(i);
-					URL u2 = new URL(img);
-	
-					HttpURLConnection c2 = (HttpURLConnection) u2
-							.openConnection();
-					c2.setUseCaches(true);
-					c2.setDoInput(true);
-					c2.connect();
-					InputStream i2 = c2.getInputStream();
-					b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);
-					b.compress(Bitmap.CompressFormat.PNG, 1, out);
-					c2.disconnect();
-					i2.close();
-				}
+				h.getImages(context);
+				Bitmap b=h.fromCache(context, h.getPic());
 				if(b!=null) {
 					setWidget(b);
 				} else {

@@ -2,8 +2,6 @@ package org.d1sturbed.ww;
 
 import java.io.Serializable;
 
-import android.util.Log;
-
 public class WWForecast implements Serializable {
 
 	private static final long serialVersionUID = -8778026920747731489L;
@@ -39,7 +37,6 @@ public class WWForecast implements Serializable {
 		}
 	}
 	public void setIcon(String icon) {
-		Log.v("licky", icon);
 		this.icon = icon;
 	}
 	public String getCondition() {

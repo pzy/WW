@@ -1,8 +1,5 @@
 package org.d1sturbed.ww;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,7 +22,15 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter {
 	ArrayList<Bitmap> ba = new ArrayList<Bitmap>();
 	WWBaseHandler h;
 	Context context;
+	public static final boolean DEBUG = WW.DEBUG;
+	public static final String TAG = "WWAdapter";
 
+	protected void debug(String msg) {
+		if (DEBUG) {
+			Log.d(TAG, msg);
+		}
+	}
+	
 	public WWAdapter(Context context, int view, WWBaseHandler h) {
 		super(context, view, h.getWwf());
 		this.context = context;
@@ -50,21 +55,16 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter {
 		p = wwf.get(position);
 		if (p != null) {
 			if (image!=null && p.getIcon()!=null) {
-				File tmp=null;
-				File f =null;
-				tmp = new File(p.getIcon());
-				File cacheDir = context.getCacheDir();
-				if(tmp!=null) {
-					f = new File(cacheDir, tmp.getName());
+				Bitmap b=null;
+				try {
+					b = h.fromCache(context, p.getIcon());
+				} catch (Exception e) {
+					debug(e.toString());
 				}
-                if(f!=null && f.exists()) {
-                	try {
-						image.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(f)));
-					} catch (FileNotFoundException e) {
-	                	image.setImageBitmap(get(h.getPicUrl(p.getIcon())));						
-					}
+                if(b==null) {
+					image.setImageBitmap(get(h.getPicUrl(p.getIcon())));
                 } else {
-                	image.setImageBitmap(get(h.getPicUrl(p.getIcon())));
+                	image.setImageBitmap(b);
                 }
 			}
 			if (tt != null) {
