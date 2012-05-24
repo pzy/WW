@@ -44,6 +44,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	
 	public void Cache(Context context, String icon) throws Exception {
 		File tmp=new File(icon);
+		final float scale = context.getResources().getDisplayMetrics().density;
         File f = new File(context.getCacheDir(), tmp.getName());
         Bitmap b=null;
         if(f.exists()) {
@@ -59,7 +60,8 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 		c2.setDoInput(true);
 		c2.connect();
 		InputStream i2 = c2.getInputStream();
-		b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);
+		b=BitmapFactory.decodeStream(i2);
+		b=Bitmap.createScaledBitmap(b,  (int)(b.getWidth()*scale+.5f), (int)(b.getHeight()*scale+.5f),false);
 		b.compress(Bitmap.CompressFormat.PNG, 1, out);
 		c2.disconnect();
 		i2.close();
