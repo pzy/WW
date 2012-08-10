@@ -24,8 +24,6 @@ public class WWUpdate extends IntentService implements Runnable {
 	public static final boolean DEBUG = WW.DEBUG;
 	//Tag for log output
 	public static final String TAG = "WWupdate";
-	//Classname of the caller
-	private String caller;
 	//current Location
 	private Location lo;
 	
@@ -35,17 +33,11 @@ public class WWUpdate extends IntentService implements Runnable {
 		this.context=context;
 	}
 	
-	public WWUpdate(Context context, String c) {
-		super("WWupdate");
-		this.context=context;
-		this.caller=c;
-	}
 	
 	
-	public WWUpdate(Context context, String c, Location lo) {
+	public WWUpdate(Context context, Location lo) {
 		super("WWupdate");
 		this.context=context;
-		this.caller=c;
 		this.lo=lo;
 	}
 	
@@ -91,11 +83,12 @@ public class WWUpdate extends IntentService implements Runnable {
 			SAXParser sp = null;
 			sp = spf.newSAXParser();
 			sp.parse(h.getUrl(lo).openStream(), h);
-			debug(caller);
+			//debug(caller);
 			//send intent with weather data to widget
-			Intent mintent = new Intent(context, Class.forName(caller));
+			Intent mintent = new Intent();
 			mintent.setAction(WW.ACTION_WIDGET_SWITCH);
 			mintent.putExtra("h", h);
+			debug("intent send");
 			context.sendBroadcast(mintent);
 		} catch (Exception e) {
 			debug(e.toString()+e.getMessage());
@@ -112,7 +105,7 @@ public class WWUpdate extends IntentService implements Runnable {
 			//if the intent sends locations data and we have the class name of the caller widget we start the update
 			if(intent.hasExtra("location")) {
 				l=(Location) intent.getParcelableExtra("location");
-				new Thread(new WWUpdate(getApplicationContext(),intent.getStringExtra("className"),l)).start();
+				new Thread(new WWUpdate(getApplicationContext(),l)).start();
 			} 
 		}
 	}

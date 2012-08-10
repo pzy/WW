@@ -34,8 +34,8 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	protected ArrayList<WWForecast> wwf=new ArrayList<WWForecast>();
 	
 
-	private int low_temp=0;
-	private int high_temp=0;
+
+	protected String location="Undefined";
 	public static final boolean DEBUG = WW.DEBUG;
 	public static final String TAG = "WWHandler";
 	
@@ -155,22 +155,6 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 		this.temperature = temperature;
 	}
 
-	public int getLow_temp() {
-		return low_temp;
-	}
-
-	public void setLow_temp(int low_temp) {
-		this.low_temp = low_temp;
-	}
-
-	public int getHigh_temp() {
-		return high_temp;
-	}
-
-	public void setHigh_temp(int high_temp) {
-		this.high_temp = high_temp;
-	}
-	
 	public String getPic() {
 		return this.pic;
 	}
@@ -194,6 +178,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	public void setTempUnit(char tempunit) {
 		this.tempUnit = tempunit;
 	}
+	
 
 
 

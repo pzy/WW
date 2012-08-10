@@ -9,5 +9,6 @@
     <string name="unit">°C</string>
     <string name="low">Low</string>
     <string name="high">High</string>
+    <string name="update">Update</string>
 
 </resources>

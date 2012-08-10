@@ -27,7 +27,7 @@ import android.widget.RemoteViews;
 public abstract class WWBaseWidget extends AppWidgetProvider implements LocationListener,Runnable {
 	
 	//debugging
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	public static final String TAG = "WWBaseWidget";
 	//intent actions
 	public static final String ACTION_WIDGET_SWITCH = "WW.ACTION_WIDGET_SWITCH";
@@ -84,7 +84,7 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		RemoteViews updateViews;
 		AppWidgetManager manager;
 		ComponentName widget;
-		
+
 		updateViews = new RemoteViews(context.getPackageName(), l);
 		debug("Base" + getClass().getName());
 		manager = AppWidgetManager.getInstance(context);
@@ -107,13 +107,13 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 		//set Widget
 		try {
 			if(b!=null) {
-				updateViews.setImageViewBitmap(R.id.widget_imageview, getRoundedCornerBitmap(b, 15));
+				updateViews.setImageViewBitmap(R.id.widget_imageview, b);
 				updateViews.setInt(R.id.widget_imageview, "setAlpha", 50);
 			}
 			updateViews.setTextViewText(R.id.widget_textview, h.getShortString());
 		} catch (Exception e) {
-			debug("Fehler: " + e.toString());
-			updateViews.setTextViewText(R.id.widget_textview, "Fehler:" + e.toString());
+			debug("ERR: " + e.toString());
+			updateViews.setTextViewText(R.id.widget_textview, "Error, please try to update manually");
 		}
 		
 		//update View
@@ -199,17 +199,20 @@ public abstract class WWBaseWidget extends AppWidgetProvider implements Location
 				w=null;
 				break;						
 		}
-		
+
 		//weather data update 
 		if(intent.getAction().equals("android.appwidget.action.APPWIDGET_UPDATE")) {
 			LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 			Criteria c=new Criteria();
 			c.setAccuracy(Criteria.POWER_LOW);
 			Location myl=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			
-				locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000000, 1000, w);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000000, 1000, w);
 			if(myl!=null) {
 				debug("updating widget");
+				if(w!=null) {
+					debug(Integer.toHexString(l));
+					w.setWidget(null);
+				}
 				w.updateWeather(myl);
 			}
 		//widget view update
