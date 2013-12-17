@@ -6,6 +6,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -78,7 +79,7 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 				+ String.valueOf(location.getLongitude())
 				+ "&locale=de_DE&gflags=R&flags=J");
 		theHTML = new DataInputStream(u.openStream());
-		while ((thisLine = theHTML.readLine()) != null) {
+		while ((thisLine = theHTML.readUTF()) != null) {
 			sb.append(thisLine);
 		}
 		String pat = ".*(,\"woeid\":)(.+?)(,\"woetype).*";
@@ -102,7 +103,7 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	    long minuts = 0;
 	    debug(time);
 	    String[] atime = time.split(" ");
-	    if (atime[1].toLowerCase().equals("pm")) {
+	    if (atime[1].toLowerCase(Locale.GERMAN).equals("pm")) {
 	    	debug("pm");
 	        minuts = 12 * 60;
 	    }
@@ -165,7 +166,7 @@ public class WWYahooHandler extends WWBaseHandler implements Serializable {
 	}
 
 	public boolean isDay() {
-		long acttime=2*60+time2minutes(new SimpleDateFormat("K:m a").format(new Date()).replaceAll("vorm.", "am").replaceAll("nachm.", "pm"));
+		long acttime=2*60+time2minutes(new SimpleDateFormat("K:m a", Locale.getDefault()).format(new Date()).replaceAll("vorm.", "am").replaceAll("nachm.", "pm"));
 		if(time2minutes(getSunrise())<acttime  && time2minutes(getSunset())>acttime) {
 			return true;
 		} else {
