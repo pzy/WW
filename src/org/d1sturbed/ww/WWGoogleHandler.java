@@ -25,6 +25,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	private final String FORETAG = "forecast_conditions";
 	//private final String LINKTAG = "icon";
 	private final String PICTAG = "icon";
+	
 	/*private final String ASTRONOMYTAG = "astronomy";
 	private final String LOCATIONTAG = "location";
 	private final String UNITTAG = "units";
@@ -49,7 +50,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	private String iconid;
 	private String sunrise;
 	private String sunset;
-	private String location;
+	
 
 	private WWForecast f;
 	
@@ -292,4 +293,7 @@ public class WWGoogleHandler extends WWBaseHandler implements Serializable {
 	public String getPicUrl(String pic) {
 		return "http://www.google.com"+pic;
 	}
+
+
+
 }

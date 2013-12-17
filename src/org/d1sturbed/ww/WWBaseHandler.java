@@ -34,8 +34,8 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	protected ArrayList<WWForecast> wwf=new ArrayList<WWForecast>();
 	
 
-	private int low_temp=0;
-	private int high_temp=0;
+
+	protected String location="Undefined";
 	public static final boolean DEBUG = WW.DEBUG;
 	public static final String TAG = "WWHandler";
 	
@@ -44,6 +44,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	
 	public void Cache(Context context, String icon) throws Exception {
 		File tmp=new File(icon);
+		final float scale = context.getResources().getDisplayMetrics().density;
         File f = new File(context.getCacheDir(), tmp.getName());
         Bitmap b=null;
         if(f.exists()) {
@@ -59,7 +60,8 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 		c2.setDoInput(true);
 		c2.connect();
 		InputStream i2 = c2.getInputStream();
-		b=Bitmap.createScaledBitmap(BitmapFactory.decodeStream(i2), 120,120,false);
+		b=BitmapFactory.decodeStream(i2);
+		b=Bitmap.createScaledBitmap(b,  (int)(b.getWidth()*scale+.5f), (int)(b.getHeight()*scale+.5f),false);
 		b.compress(Bitmap.CompressFormat.PNG, 1, out);
 		c2.disconnect();
 		i2.close();
@@ -153,22 +155,6 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 		this.temperature = temperature;
 	}
 
-	public int getLow_temp() {
-		return low_temp;
-	}
-
-	public void setLow_temp(int low_temp) {
-		this.low_temp = low_temp;
-	}
-
-	public int getHigh_temp() {
-		return high_temp;
-	}
-
-	public void setHigh_temp(int high_temp) {
-		this.high_temp = high_temp;
-	}
-	
 	public String getPic() {
 		return this.pic;
 	}
@@ -192,6 +178,7 @@ public abstract class WWBaseHandler extends DefaultHandler implements Serializab
 	public void setTempUnit(char tempunit) {
 		this.tempUnit = tempunit;
 	}
+	
 
 
 

@@ -69,7 +69,7 @@ public class WWAdapter extends ArrayAdapter<WWForecast> implements ListAdapter {
 			}
 			if (tt != null) {
 				tt.setTextColor(Color.RED);
-				tt.setText(context.getResources().getString(R.string.low)
+				tt.setText(context.getResources().getString(R.string.high)
 						+ ": " + String.format("%d", p.getHigh()) + " "
 						+ context.getResources().getString(R.string.unit));
 			}
